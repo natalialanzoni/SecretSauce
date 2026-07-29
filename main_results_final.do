@@ -255,6 +255,9 @@ gen small = 1 if log_10_flops <  p33 & log_10_flops !=.   & top_ten_comp != 13 &
 
 reg logit_mmlu log_10_flops threetime_* top10_* $moe , vce(cluster top_ten_comp)
 
+* R-squared of the regression being decomposed, for the figure caption
+local r2_label = string(e(r2), "%5.3f")
+
 * Build dynamic group specification for shapley2
 unab threetime_vars : threetime_*
 local threetime_group : list threetime_vars - threetime_1
@@ -364,7 +367,7 @@ if "$sample_def" == "moe" {
         title("") ///
         legend(off) ///
         xline(4.5, lpattern(dash) lcolor(black)) ///
-        text(0.58 2.5 "Shapley Decomposition", size(5) color(black)) ///
+        text(0.58 2.5 "Shapley Decomposition, R{superscript:2} = `r2_label'", size(5) color(black)) ///
         text(0.62 5 "Regression" "Residual", size(5) color(black)) ///
         xsize(14) ysize(5) ylabel(,format(%3.1f))
 }
@@ -387,7 +390,7 @@ else {
         title("") ///
         legend(off) ///
         xline(3.5, lpattern(dash) lcolor(black)) ///
-        text(0.58 2 "Shapley Decomposition", size(5) color(black)) ///
+        text(0.58 2 "Shapley Decomposition, R{superscript:2} = `r2_label'", size(5) color(black)) ///
         text(0.62 4 "Regression" "Residual", size(5) color(black)) ///
         xsize(11) ysize(5) ylabel(,format(%3.1f))
 }
@@ -401,6 +404,7 @@ if "$sample_def" == "default" {
 preserve
 local company_vars top10_1 top10_2 top10_3 top10_4 top10_5 top10_6 top10_7 top10_8 top10_9 top10_10 
 reg logit_mmlu log_10_flops threetime_* `company_vars' if top_ten_comp != 13 & top_ten_comp != 14 & top_ten_comp != 15, vce(cluster top_ten_comp)
+local r2_label = string(e(r2), "%5.3f")
 shapley2 log_10_flops threetime_* `company_vars', stat(r2) ///
 group(log_10_flops, threetime_2 threetime_3, `company_vars')
 
@@ -450,7 +454,7 @@ twoway ///
     (scatter mid xpos_label if order==4, mlabel(pct_label) mlabcolor(black) msymbol(none) mlabsize(4.5)), ///
     ylabel(0(0.1)0.5, angle(0) labsize(4.5)) ///
 		yscale(range(0 0.68)) ///
-	text(0.58 2 "Shapley Decomposition", size(5) color(black)) ///
+	text(0.58 2 "Shapley Decomposition, R{superscript:2} = `r2_label'", size(5) color(black)) ///
     text(0.62 4 "Regression" "Residual", size(5) color(black)) ///
 		xline(3.5, lpattern(dash) lcolor(black)) ///
     ytitle("Share of Benchmark Variation Explained", size(4.5)) ///
@@ -470,6 +474,7 @@ restore
 preserve
 local company_vars top10_1 top10_2 top10_3 top10_4 top10_5 top10_6 top10_7 top10_8 top10_9 top10_10 
 reg logit_mmlu log_10_flops threetime_* `company_vars' if below_med == 1 & top_ten_comp != 13 & top_ten_comp != 14 & top_ten_comp != 15, vce(cluster top_ten_comp)
+local r2_label = string(e(r2), "%5.3f")
 shapley2 log_10_flops threetime_* `company_vars', stat(r2) ///
 group(log_10_flops, threetime_2 threetime_3, `company_vars')
 
@@ -521,7 +526,7 @@ twoway ///
     ytitle("Share of Benchmark Variation Explained", size(4.5)) ///
 		yscale(range(0 0.68)) ///
 			xline(3.5, lpattern(dash) lcolor(black)) ///
-	text(0.58 2 "Shapley Decomposition", size(5) color(black)) ///
+	text(0.58 2 "Shapley Decomposition, R{superscript:2} = `r2_label'", size(5) color(black)) ///
     text(0.62 4 "Regression" "Residual", size(5) color(black)) ///
     xtitle("") ///
     xlabel(1 "Scaling" 2 "Shared alg. progress" 3 "Company Secret Sauce" 4 `""Model Residual" "Efficiency""', noticks labsize(large)) ///
@@ -539,6 +544,7 @@ restore
 preserve
 local company_vars top10_1 top10_2 top10_3 top10_4 top10_5 top10_6 top10_7 top10_8 top10_9 top10_10 
 reg logit_mmlu log_10_flops threetime_* `company_vars' if above_med == 1 & top_ten_comp != 13 & top_ten_comp != 14 & top_ten_comp != 15, vce(cluster top_ten_comp)
+local r2_label = string(e(r2), "%5.3f")
 shapley2 log_10_flops threetime_* `company_vars', stat(r2) ///
 group(log_10_flops, threetime_2 threetime_3, `company_vars')
 
@@ -590,7 +596,7 @@ twoway ///
     ytitle("Share of Benchmark Variation Explained", size(4.5)) ///
 			yscale(range(0 0.68)) ///
 			xline(3.5, lpattern(dash) lcolor(black)) ///
-	text(0.58 2 "Shapley Decomposition", size(5) color(black)) ///
+	text(0.58 2 "Shapley Decomposition, R{superscript:2} = `r2_label'", size(5) color(black)) ///
     text(0.62 4 "Regression" "Residual", size(5) color(black)) ///
     xtitle("") ///
     xlabel(1 "Scaling" 2 "Shared alg. progress" 3 "Company Secret Sauce" 4 `""Model Residual" "Efficiency""', noticks labsize(large)) ///
@@ -610,6 +616,9 @@ input str30 factor shapley_value percent
 "Company Secret Sauce" 0.17351 17.351
 "Model-Specific Effects" 0.455 45.5
 end
+
+* R-squared = share explained by the three groups (1 - model-specific residual)
+local r2_label = string(shapley_value[1] + shapley_value[2] + shapley_value[3], "%5.3f")
 
 gen order = _n
 gen xpos = order
@@ -631,7 +640,7 @@ twoway ///
     ytitle("Share of Benchmark Variation Explained", size(4.5)) ///
 			yscale(range(0 0.68)) ///
 			xline(3.5, lpattern(dash) lcolor(black)) ///
-	text(0.58 2 "Shapley Decomposition", size(5) color(black)) ///
+	text(0.58 2 "Shapley Decomposition, R{superscript:2} = `r2_label'", size(5) color(black)) ///
     text(0.62 4 "Regression" "Residual", size(5) color(black)) ///
     xtitle("") ///
     xlabel(1 "Scaling" 2 "Shared alg. progress" 3 "Company Secret Sauce" 4 `""Model Residual" "Efficiency""', noticks labsize(large)) ///
@@ -649,6 +658,9 @@ input str30 factor shapley_value percent
 "Company Secret Sauce" 0.17810 17.810
 "Model-Specific Effects" 0.47147 47.1
 end
+
+* R-squared = share explained by the three groups (1 - model-specific residual)
+local r2_label = string(shapley_value[1] + shapley_value[2] + shapley_value[3], "%5.3f")
 
 gen order = _n
 gen xpos = order
@@ -671,7 +683,7 @@ twoway ///
     ytitle("Share of Benchmark Variation Explained", size(4.5)) ///
 			yscale(range(0 0.68)) ///
 			xline(3.5, lpattern(dash) lcolor(black)) ///
-	text(0.58 2 "Shapley Decomposition", size(5) color(black)) ///
+	text(0.58 2 "Shapley Decomposition, R{superscript:2} = `r2_label'", size(5) color(black)) ///
     text(0.62 4 "Regression" "Residual", size(5) color(black)) ///
     xtitle("") ///
     xlabel(1 "Scaling" 2 "Shared alg. progress" 3 "Company Secret Sauce" 4 `""Model Residual" "Efficiency""', noticks labsize(large)) ///
@@ -1931,5 +1943,199 @@ bys top_ten_comp: egen min_flop_factor = min(comp_and_res_flop_factor_lo)
 bys top_ten_comp: egen max_flop_factor = max(comp_and_res_flop_factor_hi)
 
 save "$resultspath/data_for_python_graphs.dta", replace
+
+
+*******************************************************************************
+* Referee Comment 2: Figure 3 on the Eq. (1) release cohorts
+*
+* Figure 3 in the paper has two panels, both on a continuous time axis:
+*   (a) best-scoring model over time      (year-quarter, mmlu_pro_best_models.pdf)
+*   (b) minimum compute needed to reach a given benchmark score over time
+*       (year-month, Size_for_given_performance_monthsMMLU_flops.png)
+*
+* Both are reproduced here on the three release cohorts of Eq. (1) (three_time:
+* 2022q4-2023q3, 2023q4-2024q2, 2024q3-2025q1), so the figure and the regression
+* describe time the same way.
+*
+* Statistics are computed within cohort and then carried forward across cohorts,
+* exactly as the monthly/quarterly versions do: the best score never falls and
+* the minimum compute for a given score never rises, so both panels stay
+* monotone. A cohort that produces nothing better inherits the earlier record
+* (and, in panel (a), the earlier record holder's name).
+*
+* Underlying numbers are written to CSV next to the figures.
+*******************************************************************************
+if "$sample_def" == "default" {
+
+*******************************
+* Panel (a): benchmark score by release cohort
+*******************************
+use "$resultspath/help.dta", clear
+drop if missing(three_time)
+
+* Best model within each Eq. (1) cohort
+bysort three_time: egen double coh_max_score = max(mmlu_pro_acc)
+bysort three_time: egen coh_N                = count(mmlu_pro_acc)
+
+* Keep the top-scoring model of each cohort (first alphabetically if tied)
+keep if mmlu_pro_acc == coh_max_score
+bysort three_time (model_id): keep if _n == 1
+
+* Same display names as the quarterly version of this panel
+gen best_model = model_id
+replace best_model = "GPT-J 6B"          if best_model == "EleutherAI__gpt-j-6b"
+replace best_model = "GPT JT 6B v1"      if best_model == "togethercomputer__GPT-JT-6B-v1"
+replace best_model = "Flan ul2"          if best_model == "google__flan-ul2"
+replace best_model = "Flan T5 xxl"       if best_model == "google__flan-t5-xxl"
+replace best_model = "LLaMA 65b"         if best_model == "huggyllama/llama-65b"
+replace best_model = "Falcon 40b"        if best_model == "tiiuae__falcon-40b"
+replace best_model = "Llama 2 70b hf"    if best_model == "meta-llama__Llama-2-70b-hf"
+replace best_model = "Orca mini v3 70b"  if best_model == "pankajmathur__orca_mini_v3_70b"
+replace best_model = "Orca mini v3 70b"  if best_model == "Orca_mini_v3_70b"
+replace best_model = "Yi 34B 200K"       if best_model == "01-ai__Yi-34B-200K"
+replace best_model = "Yi 34B"            if best_model == "01-ai__Yi-34B"
+replace best_model = "Qwen 2.5 72B"      if best_model == "Qwen__Qwen2.5-72B"
+replace best_model = "CausalLM 34b beta" if best_model == "CausalLM__34b-beta"
+replace best_model = "Claude 3 Opus"     if best_model == "Claude-3-Opus"
+replace best_model = "Gemini 1.5 Pro"    if best_model == "Gemini-1.5-Pro"
+replace best_model = "GPT-o1 mini"       if best_model == "GPT-o1-mini"
+replace best_model = "GPT 4.5"           if best_model == "GPT-4.5"
+
+gen best_score = acc_norm_new * 100
+
+keep three_time coh_N best_model best_score
+sort three_time
+
+* Running max, as in the quarterly version: a cohort whose own best model does
+* not beat the standing record keeps the earlier score and the earlier model name
+forvalues i = 2/`=_N' {
+    if best_score[`i'] < best_score[`i'-1] {
+        replace best_score = best_score[`i'-1] in `i'
+        replace best_model = best_model[`i'-1] in `i'
+    }
+}
+
+list three_time coh_N best_model best_score, noobs
+export delimited using "$resultspath/fig3a_cohort_best_models.csv", replace
+
+* Model names sit above their marker, except where the rising line runs through
+* that space: below for the first cohort, upper-left for the second
+gen byte mlabpos = 12
+replace mlabpos = 6  if three_time == 0
+replace mlabpos = 11 if three_time == 1
+
+twoway ///
+    (connected best_score three_time, lcolor(dknavy) lwidth(thick) ///
+        msymbol(D) mcolor(dknavy) msize(2) ///
+        mlabel(best_model) mlabcolor(black) mlabvposition(mlabpos) mlabgap(2) mlabsize(3.5)), ///
+    legend(off) ///
+    ytitle("Benchmark score (%)", size(4)) ///
+    ylabel(0(20)100, labsize(4)) yscale(range(0 115)) ///
+    xtitle("Release cohort (Eq. 1 time bins)", size(4)) ///
+    xlabel(0 1 2, valuelabel noticks labsize(3.5)) ///
+    xscale(range(-0.5 2.5)) ///
+    title("") ///
+    name(fig3a_cohort, replace)
+graph export "$figpath/fig3a_cohort_best_models.pdf", replace
+
+
+*******************************
+* Panel (b): minimum compute to reach a given score, by release cohort
+*******************************
+use "$resultspath/help.dta", clear
+drop if missing(three_time)
+keep if log_flops != .
+
+* Same normalized score the monthly version thresholds on
+replace mmlu_pro_acc = acc_norm_new
+
+* Minimum compute among the cohort's models that clear each score threshold
+foreach x in 10 20 30 40 50 60 70 80 90 {
+    local ccc = `x'/100
+    bysort three_time: egen MinCH`x' = min(log_10_flops) if mmlu_pro_acc >= `ccc' & mmlu_pro_acc != .
+    bysort three_time: egen MinC`x'  = min(MinCH`x')
+}
+
+bysort three_time: egen coh_N = count(log_10_flops)
+
+keep three_time coh_N MinC10 MinC20 MinC30 MinC40 MinC50 MinC60 MinC70 MinC80 MinC90
+duplicates drop
+sort three_time
+
+* Running min, as in the monthly version: once a threshold has been reached with
+* a given amount of compute, later cohorts inherit that value unless they show
+* something cheaper, so the frontier never rises
+foreach x in 10 20 30 40 50 60 70 80 90 {
+    replace MinC`x' = MinC`x'[_n-1] if MinC`x'[_n-1] < MinC`x' & !missing(MinC`x'[_n-1])
+}
+
+list, noobs
+export delimited using "$resultspath/fig3b_cohort_min_flops.csv", replace
+
+* Build the plot from the thresholds that at least one cohort actually reaches,
+* so an unreachable threshold (e.g. 90%) drops out instead of erroring.
+local yvars   ""
+local lcolors ""
+local msyms   ""
+local lpats   ""
+local lwids   ""
+local msizes  ""
+local labopts ""
+local prevlab = .
+local i 0
+foreach x in 10 20 30 40 50 60 70 80 90 {
+    local i = `i' + 1
+    local c : word `i' of eltblue ltblue ebblue midblue blue dknavy navy sand cranberry
+    local s : word `i' of S O T D Oh Sh Th Dh X
+    local p : word `i' of solid dash longdash shortdash longdash_dot shortdash_dot dash_dot solid dash
+    qui count if !missing(MinC`x')
+    if r(N) > 0 {
+        local yvars   `yvars' MinC`x'
+        local lcolors `lcolors' `c'
+        local msyms   `msyms' `s'
+        local lpats   `lpats' `p'
+        local lwids   `lwids' medthick
+        local msizes  `msizes' 1.4
+        * Threshold label, anchored to the last cohort. Thresholds can share the
+        * same minimum (the same model is the cheapest way to clear both), so
+        * keep the labels at least 0.45 dex apart to stop them stacking.
+        local yv = MinC`x'[_N]
+        if !missing(`yv') {
+            local ylab = `yv'
+            if !missing(`prevlab') & `ylab' - `prevlab' < 0.45 {
+                local ylab = `prevlab' + 0.45
+            }
+            local labopts `labopts' text(`ylab' `=three_time[_N]' "  `x'%", place(e) color(`c'))
+            local prevlab = `ylab'
+        }
+    }
+    else {
+        di as txt "note: no model reaches `x'% in any cohort - series omitted"
+    }
+}
+
+* Series are identified by the threshold labels on the right, so no legend
+twoway connected `yvars' three_time, ///
+    lcolor(`lcolors') mcolor(`lcolors') ///
+    msymbol(`msyms') lpattern(`lpats') ///
+    lwidth(`lwids') msize(`msizes') ///
+    legend(off) ///
+    xtitle("Release cohort (Eq. 1 time bins)", size(4)) ///
+    xlabel(0 1 2, valuelabel noticks labsize(3.5)) ///
+    xscale(range(-0.15 2.15)) ///
+    ytitle(FLOPs, size(4)) ///
+    ylabel(18 "10{superscript:18}" 20 "10{superscript:20}" 22 "10{superscript:22}" 24 "10{superscript:24}" 26 "10{superscript:26}" 28 "10{superscript:28}", angle(0)) ///
+    graphregion(margin(r = 12)) ///
+    `labopts' ///
+    title("") ///
+    name(fig3b_cohort, replace)
+graph export "$figpath/fig3b_cohort_min_flops.pdf", replace
+
+* Two-panel version matching the layout of Figure 3
+graph combine fig3a_cohort fig3b_cohort, ///
+    cols(2) xsize(12) ysize(5) graphregion(margin(zero))
+graph export "$figpath/fig3_cohort_combined.pdf", replace
+
+}
 			
 
