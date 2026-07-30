@@ -254,7 +254,7 @@ foreach val of local levels {
     local pos = `pos' + 1
 }
 
-bysort three_time:  egen median_size = median(log_10_flops) if  top_ten_comp != 13 & top_ten_comp != 14 & top_ten_comp != 15
+bysort three_time:  egen float median_size = median(log_10_flops) if  top_ten_comp != 13 & top_ten_comp != 14 & top_ten_comp != 15
 
 
 *egen median_size = median(log_10_flops) if  top_ten_comp != 13 & top_ten_comp != 14 & top_ten_comp != 15
